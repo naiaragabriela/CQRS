@@ -1,12 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net;
+using AutoMapper;
+using CQRS.Domain.Contracts;
+using CQRS.Domain.Core;
 
 namespace CQRS.Domain.Queries.GetPerson
 {
-    public class GetPersonQueryHandler
+    public class GetPersonQueryHandler: BaseHandler
     {
+        private readonly IPersonRepository _repository;
+        private readonly IMapper _mapper;
+        public GetPersonQueryHandler(IPersonRepository repository, IMapper mapper)
+        {
+            _repository = repository;
+            _mapper = mapper;
+        }
+
+        public async Task<GetPersonQueryResponse?> HandleAsync(GetPersonQuery command, CancellationToken cancellationToken)
+        {
+            var dataBaseEntity = await _repository.GetByIdAsync(command.Id, cancellationToken);
+
+            if (!string.IsNullOrWhiteSpace(dataBaseEntity?.Name))
+                return _mapper.Map<GetPersonQueryResponse>(dataBaseEntity);
+
+            AddNotification($"Person with id = {command.Id} does not exist.");
+
+            SetStatusCode(HttpStatusCode.NotFound);
+
+            return null;
+        }
     }
 }

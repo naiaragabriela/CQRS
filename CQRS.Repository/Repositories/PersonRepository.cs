@@ -27,5 +27,12 @@ namespace CQRS.Repository.Repositories
 
             return await Collection.Find(filter).ToListAsync(cancellation);
         }
+        public async Task<Person> GetByIdAsync(Guid personId, CancellationToken cancellation)
+        {
+            var filter = Builders<Person>.Filter
+                .Eq(restaurant => restaurant.Id, personId);
+
+            return await Collection.Find(filter).FirstOrDefaultAsync(cancellation);
+        }
     }
 }

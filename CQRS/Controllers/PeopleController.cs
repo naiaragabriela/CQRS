@@ -1,6 +1,7 @@
 ﻿using CQRS.Domain.Commands.CreatePerson;
 using CQRS.Domain.Core;
 using CQRS.Domain.Domain;
+using CQRS.Domain.Queries.GetPerson;
 using CQRS.Domain.Queries.ListPerson;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +15,14 @@ namespace CQRS.Api.Controllers
     {
         private readonly CreatePersonCommandHandler _createPersonCommandHandler;
         private readonly ListPersonQueryHandler _listPersonQueryHandler;
+        private readonly GetPersonQueryHandler _getPersonQueryHandler;
         public PeopleController(CreatePersonCommandHandler createPersonCommandHandler,
-            ListPersonQueryHandler listPersonQueryHandler)
+            ListPersonQueryHandler listPersonQueryHandler,
+            GetPersonQueryHandler getPersonQueryHandler)
         {
             _createPersonCommandHandler = createPersonCommandHandler;
             _listPersonQueryHandler = listPersonQueryHandler;
+            _getPersonQueryHandler = getPersonQueryHandler;
         }
 
 
@@ -43,6 +47,14 @@ namespace CQRS.Api.Controllers
 
             return GetResponse(_listPersonQueryHandler, response);
         }
+
+        [HttpGet("{id:guid}", Name = "Get Person By Id")]
+        public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id, CancellationToken cancellationToken)
+        {
+            var response = await _getPersonQueryHandler.HandleAsync(new GetPersonQuery(id), cancellationToken);
+            return GetResponse(_getPersonQueryHandler, response);
+        }
+
 
         private IActionResult GetResponse<THandler, TResponse>(THandler handler, TResponse response)
             where THandler : BaseHandler

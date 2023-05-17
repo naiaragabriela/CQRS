@@ -16,5 +16,10 @@ namespace CQRS.Domain.Contracts
         Task<IEnumerable<Person>> GetAsync(
             Expression<Func<Person, bool>> expression,
             CancellationToken cancellation);
-     }
+
+        Task<Person> GetByIdAsync(
+            Guid personId, 
+            CancellationToken cancellation);
+
+    }
 }
